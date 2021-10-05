@@ -7,34 +7,34 @@ import Welcome from '../components/Welcome.vue'
 Vue.use(VueRouter)
 
 const routes = [{
-        path: '/login',
-        component: Login
-    },
-    {
-        path: '/home',
-        component: Home,
-        children: [{
-            path: '/home/welcome',
-            component: Welcome
-        }, {
-            path: '',
-            redirect: ('/home/welcome')
-        }]
-    }, {
-        path: '/',
-        redirect: '/login'
-    }
+  path: '/login',
+  component: Login
+},
+{
+  path: '/home',
+  component: Home,
+  children: [{
+    path: '/home/welcome',
+    component: Welcome
+  }, {
+    path: '',
+    redirect: ('/home/welcome')
+  }]
+}, {
+  path: '/',
+  redirect: '/login'
+}
 ]
 
 const router = new VueRouter({
-    routes
+  routes
 })
 
 router.beforeEach((to, from, next) => {
-    if (to.path === '/login') return next()
-    const tokenStr = window.sessionStorage.getItem('token')
-    if (!tokenStr) return next('/login')
-    next()
+  if (to.path === '/login') return next()
+  const tokenStr = window.sessionStorage.getItem('token')
+  if (!tokenStr) return next('/login')
+  next()
 })
 
 export default router

@@ -43,38 +43,38 @@
 
 <script>
 export default {
-  data(){
-    return{
+  data () {
+    return {
       isCollapse: false,
-      menuList:[],
-      iconsObj:{
-        '125': 'iconfont icon-user',
-        '103': 'iconfont icon-tijikongjian',
-        '101': 'iconfont icon-shangpin',
-        '102': 'iconfont icon-danju',
-        '145': 'iconfont icon-baobiao'
+      menuList: [],
+      iconsObj: {
+        125: 'iconfont icon-user',
+        103: 'iconfont icon-tijikongjian',
+        101: 'iconfont icon-shangpin',
+        102: 'iconfont icon-danju',
+        145: 'iconfont icon-baobiao'
       }
     }
   },
   methods: {
-    logout() {
-      window.sessionStorage.clear("token");
-      this.$router.push("/login");
+    logout () {
+      window.sessionStorage.clear('token')
+      this.$router.push('/login')
     },
-    async getMenuList() {
-      const {data:res} = await this.$http.get("menus")
-      console.log(res);
-      if(res.meta.status!=200) return this.$message.error(res.meta.msg);
+    async getMenuList () {
+      const { data: res } = await this.$http.get('menus')
+      console.log(res)
+      if (res.meta.status != 200) return this.$message.error(res.meta.msg)
       this.menuList = res.data
     },
-    toggleCollapse(){
+    toggleCollapse () {
       this.isCollapse = !this.isCollapse
     }
   },
-  created() {
-    this.getMenuList();
-  },
-};
+  created () {
+    this.getMenuList()
+  }
+}
 </script>
 
 <style scoped>
