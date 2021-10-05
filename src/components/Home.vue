@@ -8,33 +8,46 @@
       <el-button @click="logout" type="info">退出</el-button>
     </el-header>
     <el-container>
-      <el-aside :width="isCollapse? '64px': '200px'">
+      <el-aside
+        :width="isCollapse ? '64px' : '200px'"
+        style="transition: all 0.3s"
+      >
         <div @click="toggleCollapse" class="toggle-button">|||</div>
         <el-menu
           background-color="#333744"
           text-color="#fff"
           active-text-color="#409eff"
           :unique-opened="true"
-          :collapse=isCollapse
+          :collapse="isCollapse"
           :collapse-transition="false"
+          :router="true"
+          :default-active="activePath"
         >
-
-          <el-submenu :index="item.id + ''" v-for="item in menuList" :key="item.id">
+          <el-submenu
+            :index="item.id + ''"
+            v-for="item in menuList"
+            :key="item.id"
+          >
             <template slot="title">
               <i :class="iconsObj[item.id]"></i>
-              <span>{{item.authName}}</span>
+              <span>{{ item.authName }}</span>
             </template>
 
-            <el-menu-item :index="child.id + ''" v-for="child in item.children" :key="child.id">
+            <el-menu-item
+              :index="child.path"
+              v-for="child in item.children"
+              :key="child.id"
+              @click="saveNavState(child.path)"
+            >
               <template slot="title">
                 <i class="el-icon-menu"></i>
-                <span>{{child.authName}}</span>
+                <span>{{ child.authName }}</span>
               </template>
             </el-menu-item>
           </el-submenu>
         </el-menu>
       </el-aside>
-      <el-main>Main
+      <el-main>
         <router-view></router-view>
       </el-main>
     </el-container>
@@ -43,38 +56,44 @@
 
 <script>
 export default {
-  data () {
+  data() {
     return {
       isCollapse: false,
       menuList: [],
       iconsObj: {
-        125: 'iconfont icon-user',
-        103: 'iconfont icon-tijikongjian',
-        101: 'iconfont icon-shangpin',
-        102: 'iconfont icon-danju',
-        145: 'iconfont icon-baobiao'
-      }
-    }
+        125: "iconfont icon-user",
+        103: "iconfont icon-tijikongjian",
+        101: "iconfont icon-shangpin",
+        102: "iconfont icon-danju",
+        145: "iconfont icon-baobiao",
+      },
+      activePath: "",
+    };
   },
   methods: {
-    logout () {
-      window.sessionStorage.clear('token')
-      this.$router.push('/login')
+    logout() {
+      window.sessionStorage.clear("token");
+      this.$router.push("/login");
     },
-    async getMenuList () {
-      const { data: res } = await this.$http.get('menus')
-      console.log(res)
-      if (res.meta.status != 200) return this.$message.error(res.meta.msg)
-      this.menuList = res.data
+    async getMenuList() {
+      const { data: res } = await this.$http.get("menus");
+      console.log(res);
+      if (res.meta.status != 200) return this.$message.error(res.meta.msg);
+      this.menuList = res.data;
     },
-    toggleCollapse () {
-      this.isCollapse = !this.isCollapse
-    }
+    toggleCollapse() {
+      this.isCollapse = !this.isCollapse;
+    },
+    saveNavState(activePath) {
+      window.sessionStorage.setItem("activePath", activePath);
+      this.activePath = activePath;
+    },
   },
-  created () {
-    this.getMenuList()
-  }
-}
+  created() {
+    this.activePath = window.sessionStorage.getItem("activePath");
+    this.getMenuList();
+  },
+};
 </script>
 
 <style scoped>
@@ -97,7 +116,7 @@ export default {
 .el-aside {
   background-color: #333744;
 }
-.el-aside .el-menu{
+.el-aside .el-menu {
   border-right: none;
 }
 .el-main {
@@ -106,10 +125,10 @@ export default {
 .home-container {
   height: 100%;
 }
-.iconfont{
+.iconfont {
   margin-right: 10px;
 }
-.toggle-button{
+.toggle-button {
   background-color: #4a5064;
   color: #fff;
   font-size: 10px;
