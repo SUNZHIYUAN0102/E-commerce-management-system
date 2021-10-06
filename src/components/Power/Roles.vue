@@ -28,7 +28,11 @@
               @click="showEditDialog(scope.row.id)"
               >编辑</el-button
             >
-            <el-button type="danger" icon="el-icon-delete" size="mini"
+            <el-button
+              type="danger"
+              icon="el-icon-delete"
+              size="mini"
+              @click="removeRoleById(scope.row.id)"
               >删除</el-button
             >
             <el-button type="warning" icon="el-icon-setting" size="mini"
@@ -198,6 +202,27 @@ export default {
           return;
         }
       });
+    },
+    async removeRoleById(id) {
+      const confirmResult = await this.$confirm(
+        "此操作将永久删除该文件, 是否继续?",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+          center: true,
+        }
+      ).catch((err) => err);
+
+      if (confirmResult == "confirm") {
+        const { data: res } = await this.$http.delete(`roles/${id}`);
+        if (res.meta.status != 200) this.$message.error("删除用户失败");
+        this.$message.success("删除用户成功");
+        this.getRoleList();
+      } else {
+        this.$message.info("已取消删除");
+      }
     },
   },
   created() {
