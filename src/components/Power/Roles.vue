@@ -23,7 +23,11 @@
               :class="['bdbottom', 'vcenter', it1 === 0 ? 'bdtop' : '']"
             >
               <el-col :span="5">
-                <el-tag>{{ item1.authName }}</el-tag>
+                <el-tag
+                  closable
+                  @close="removeRightById(scope.row, item1.id)"
+                  >{{ item1.authName }}</el-tag
+                >
                 <i class="el-icon-caret-right"></i>
               </el-col>
               <el-col :span="19">
@@ -33,7 +37,12 @@
                   :class="['vcenter', it2 === 0 ? '' : 'bdtop']"
                 >
                   <el-col :span="6">
-                    <el-tag type="success">{{ item2.authName }}</el-tag>
+                    <el-tag
+                      type="success"
+                      closable
+                      @close="removeRightById(scope.row, item2.id)"
+                      >{{ item2.authName }}</el-tag
+                    >
                     <i class="el-icon-caret-right"></i>
                   </el-col>
                   <el-col :span="18">
@@ -42,7 +51,7 @@
                       v-for="item3 in item2.children"
                       :key="item3.id"
                       closable
-                      @close="removeRightById"
+                      @close="removeRightById(scope.row, item3.id)"
                     >
                       {{ item3.authName }}
                     </el-tag>
@@ -260,7 +269,7 @@ export default {
         this.$message.info("已取消删除");
       }
     },
-    async removeRightById() {
+    async removeRightById(role, rightId) {
       const confirmResult = await this.$confirm(
         "此操作将永久删除该文件, 是否继续?",
         "提示",
@@ -271,9 +280,19 @@ export default {
         }
       ).catch((err) => err);
 
-      if(confirmResult != 'confirm') return this.$message.info ="取消删除";
+      if (confirmResult == "confirm") {
+        const { data: res } = await this.$http.delete(
+          `roles/${role.id}/rights/${rightId}`
+        );
 
-      console.log('meow');
+        if (res.meta.status != 200) return this.$message.error("删除权限失败");
+
+        this.$message.success("删除权限成功");
+
+        role.children = res.data;
+      }
+
+      this.$message.info("取消删除");
     },
   },
   created() {
