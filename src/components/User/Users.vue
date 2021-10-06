@@ -103,7 +103,7 @@
       </el-pagination>
     </el-card>
 
-    <el-dialog title="添加用户" :visible.sync="dialogVisible" width="50%">
+    <el-dialog title="添加用户" :visible.sync="dialogVisible" width="50%" @close="addDialogClosed">
       <el-form
         :model="addForm"
         :rules="addFormRules"
@@ -129,7 +129,7 @@
 
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false"
+        <el-button type="primary" @click="addUser"
           >确 定</el-button
         >
       </span>
@@ -140,6 +140,14 @@
 <script>
 export default {
   data() {
+    var checkMobile = (rule, value, cb) => {
+      const regMobile =
+        /^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/;
+      if (regMobile.test(value)) {
+        return cb();
+      }
+      cb(new Error("请输入正确的手机号"));
+    };
     return {
       queryInfo: {
         query: "",
@@ -153,7 +161,7 @@ export default {
         username: "",
         password: "",
         email: "",
-        mobile:""
+        mobile: "",
       },
       addFormRules: {
         username: [
@@ -184,6 +192,7 @@ export default {
         ],
         mobile: [
           { required: true, message: "请输入手机号", trigger: "blur" },
+          { validator: checkMobile, trigger: "blur" },
         ],
       },
     };
@@ -222,6 +231,22 @@ export default {
 
       this.$message.success("更新用户状态成功!");
     },
+    addDialogClosed(){
+      this.$refs.addFormRef.resetFields();
+    },
+    addUser(){
+      this.$refs.addFormRef.validate(async valid => {
+          if (valid) {
+            this.dialogVisible = false
+            const {data: res} = await this.$http.post('users',this.addForm);
+            if(res.meta.status != 201) return this.$message.error("创建用户失败");
+            this.$message.success("创建用户成功");
+            this.getUserList();
+          } else {
+            return
+          }
+        });
+    }
   },
 };
 </script>
