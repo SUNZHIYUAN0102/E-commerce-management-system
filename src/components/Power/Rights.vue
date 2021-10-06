@@ -36,7 +36,6 @@ export default {
 
     this.rightsList = res.data;
     this.$message.success("获取权限列表成功");
-    console.log(this.rightsList);
   },
 };
 </script>
