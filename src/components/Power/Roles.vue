@@ -80,7 +80,11 @@
               @click="removeRoleById(scope.row.id)"
               >删除</el-button
             >
-            <el-button type="warning" icon="el-icon-setting" size="mini"
+            <el-button
+              type="warning"
+              icon="el-icon-setting"
+              size="mini"
+              @click="showSetRightDialog(scope.row)"
               >分配权限</el-button
             >
           </template>
@@ -139,6 +143,29 @@
         <el-button type="primary" @click="editRole">确 定</el-button>
       </span>
     </el-dialog>
+
+    <el-dialog
+      title="分配权限"
+      :visible.sync="setRightDialogVisible"
+      width="50%"
+      @close="clearDef"
+    >
+      <el-tree
+        :data="rightsList"
+        :props="treeProps"
+        show-checkbox
+        node-key="id"
+        default-expand-all
+        :default-checked-keys="defKeys"
+        ref="treeRef"
+      ></el-tree>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="setRightDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="allotRights"
+          >确 定</el-button
+        >
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -190,6 +217,15 @@ export default {
           },
         ],
       },
+
+      setRightDialogVisible: false,
+      rightsList: [],
+      treeProps: {
+        label: "authName",
+        children: "children",
+      },
+      defKeys: [],
+      roleId:'',
     };
   },
   methods: {
@@ -294,6 +330,41 @@ export default {
 
       this.$message.info("取消删除");
     },
+    async showSetRightDialog(role) {
+      this.roleId = role.id;
+      const { data: res } = await this.$http.get("rights/tree");
+      if (res.meta.status != 200)
+        return this.$message.error("获取权限列表失败");
+      this.$message.success("获取权限列表成功");
+      this.rightsList = res.data;
+      console.log(this.rightsList);
+      this.getLeafKeys(role, this.defKeys);
+
+      this.setRightDialogVisible = true;
+    },
+
+    getLeafKeys(node, arr) {
+      if (!node.children) {
+        return arr.push(node.id);
+      }
+
+      node.children.forEach((item) => {
+        this.getLeafKeys(item, arr);
+      });
+    },
+
+    clearDef(){
+      this.defKeys = [];
+    },
+    async allotRights(){
+      const keys = [...this.$refs.treeRef.getCheckedKeys(),...this.$refs.treeRef.getHalfCheckedKeys()];
+      const idStr = keys.join(',');
+      const {data:res} = await this.$http.post(`roles/${this.roleId}/rights`,{rids:idStr});
+      if(res.meta.status !=200) return this.$message.error('分配权限失败');
+      this.$message.success('分配权限成功')
+      this.getRoleList();
+      this.setRightDialogVisible = false
+    }
   },
   created() {
     this.getRoleList();
