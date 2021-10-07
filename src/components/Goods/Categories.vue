@@ -51,11 +51,19 @@
           >
         </template>
 
-        <template slot="opt">
-          <el-button type="primary" icon="el-icon-edit" size="mini"
+        <template slot="opt" scope="scope">
+          <el-button
+            type="primary"
+            icon="el-icon-edit"
+            size="mini"
+            @click="showEditCateDialog(scope.row.cat_id)"
             >编辑</el-button
           >
-          <el-button type="danger" icon="el-icon-delete" size="mini"
+          <el-button
+            type="danger"
+            icon="el-icon-delete"
+            size="mini"
+            @click="showDeleteMessageBox(scope.row.cat_id)"
             >删除</el-button
           >
         </template>
@@ -104,6 +112,28 @@
         <el-button type="primary" @click="addCate">确 定</el-button>
       </span>
     </el-dialog>
+
+    <el-dialog
+      title="更改分类"
+      :visible.sync="editCateDialogVisible"
+      width="50%"
+      @close="editCateDialogClosed"
+    >
+      <el-form
+        :model="editCateForm"
+        :rules="EditCateFormRules"
+        ref="editCateRef"
+        label-width="100px"
+      >
+        <el-form-item label="分类名称" prop="cat_name">
+          <el-input v-model="editCateForm.cat_name"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="editCateDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="editCate">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -112,6 +142,15 @@ export default {
   data() {
     return {
       addCateDialogVisible: false,
+      editCateDialogVisible: false,
+      editCateForm: {
+        cat_name: "",
+      },
+      EditCateFormRules: {
+        cat_name: [
+          { required: true, message: "请输入分类名称", trigger: "blur" },
+        ],
+      },
       addCateForm: {
         cat_name: "",
         cat_pid: 0,
@@ -158,6 +197,8 @@ export default {
         checkStrictly: "true",
       },
       parentCateList: [],
+
+      editCateId: "",
     };
   },
   methods: {
@@ -239,6 +280,61 @@ export default {
       this.selectedKeys = [];
       this.addCateForm.cat_level = 0;
       this.addCateForm.cat_pid = 0;
+    },
+
+    async showEditCateDialog(id) {
+      const { data: res } = await this.$http.get(`categories/${id}`);
+      if (res.meta.status != 200)
+        return this.$message.error("获取当前分类失败");
+      this.editCateForm.cat_name = res.data.cat_name;
+      this.editCateId = res.data.cat_id;
+      this.editCateDialogVisible = true;
+    },
+
+    editCateDialogClosed() {
+      this.$refs.editCateRef.resetFields();
+      this.editCateId = "";
+    },
+
+    editCate() {
+      this.$refs.editCateRef.validate(async (valid) => {
+        if (valid) {
+          const { data: res } = await this.$http.put(
+            `categories/${this.editCateId}`,
+            {
+              cat_name: this.editCateForm.cat_name,
+            }
+          );
+          if (res.meta.status != 200)
+            return this.$message.error("修改分类失败");
+          this.$message.success("修改分类成功");
+          this.editCateDialogVisible = false;
+          this.getCategories();
+        } else {
+          return;
+        }
+      });
+    },
+
+    async showDeleteMessageBox(id) {
+      const confirmResult = await this.$confirm(
+        "此操作将永久删除该文件, 是否继续?",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        }
+      ).catch((err) => err);
+
+      if(confirmResult == "confirm"){
+        const{data:res} = await this.$http.delete(`categories/${id}`);
+        if(res.meta.status!=200) return this.$message.error('删除分类失败');
+        this.getCategories();
+        this.$message.success('删除分类成功');
+      }else{
+        this.$message.info('已取消删除');
+      }
     },
   },
   created() {
