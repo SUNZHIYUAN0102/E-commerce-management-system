@@ -30,7 +30,11 @@
 
       <el-tabs v-model="activeName" @tab-click="handleTabClick">
         <el-tab-pane label="动态参数" name="many"
-          ><el-button type="primary" size="mini" :disabled="isBtnDisabled"
+          ><el-button
+            type="primary"
+            size="mini"
+            :disabled="isBtnDisabled"
+            @click="addDialogVisible = true"
             >添加参数</el-button
           >
           <el-table :data="manyTableData" border stripe>
@@ -51,7 +55,11 @@
           </el-table></el-tab-pane
         >
         <el-tab-pane label="静态属性" name="only"
-          ><el-button type="primary" size="mini" :disabled="isBtnDisabled"
+          ><el-button
+            type="primary"
+            size="mini"
+            :disabled="isBtnDisabled"
+            @click="addDialogVisible = true"
             >添加属性</el-button
           >
           <el-table :data="onlyTableData" border stripe>
@@ -73,6 +81,31 @@
         </el-tab-pane>
       </el-tabs>
     </el-card>
+
+    <el-dialog
+      :title="activeName === 'many' ? '添加动态参数' : '添加静态属性'"
+      :visible.sync="addDialogVisible"
+      width="50%"
+      @close="addDialogClosed"
+    >
+      <el-form
+        :model="addForm"
+        :rules="addFormRules"
+        ref="addFormRef"
+        label-width="100px"
+      >
+        <el-form-item
+          :label="activeName === 'many' ? '动态参数' : '静态属性'"
+          prop="attr_name"
+        >
+          <el-input v-model="addForm.attr_name"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="addDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addParams">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -80,6 +113,17 @@
 export default {
   data() {
     return {
+      addForm: {
+        attr_name: "",
+      },
+
+      addFormRules: {
+        attr_name: [
+          { required: true, message: "请输入参数名称", trigger: "blur" },
+        ],
+      },
+
+      addDialogVisible: false,
       cateList: [],
 
       selectedCateKey: [],
@@ -139,6 +183,30 @@ export default {
 
     handleTabClick() {
       this.getParamsData();
+    },
+
+    addDialogClosed() {
+      this.$refs.addFormRef.resetFields();
+    },
+
+    addParams() {
+      this.$refs.addFormRef.validate(async (valid) => {
+        if (valid) {
+          const { data: res } = await this.$http.post(
+            `categories/${this.cateId}/attributes`,
+            {
+              attr_name: this.addForm.attr_name,
+              attr_sel: this.activeName,
+            }
+          );
+          if(res.meta.status !=201) return this.$message.error('创建参数失败');
+          this.addDialogVisible = false;
+          this.$message.success('创建参数成功');
+          this.getParamsData();
+        } else {
+          return;
+        }
+      });
     },
   },
 
