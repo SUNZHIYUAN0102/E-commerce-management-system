@@ -38,7 +38,38 @@
             >添加参数</el-button
           >
           <el-table :data="manyTableData" border stripe>
-            <el-table-column type="expand"></el-table-column>
+            <el-table-column type="expand">
+              <template scope="scope">
+                <el-tag
+                  style="margin: 0 15px"
+                  v-for="(item, index) in scope.row.attr_vals"
+                  :key="index"
+                  closable
+                  @close="handleClose(index, scope.row)"
+                >
+                  {{ item }}</el-tag
+                >
+                <el-input
+                  style="width: 120px; margin: 0 15px"
+                  class="input-new-tag"
+                  v-if="scope.row.inputVisible"
+                  v-model="scope.row.inputValue"
+                  ref="saveTagInput"
+                  size="small"
+                  @keyup.enter.native="handleInputConfirm(scope.row)"
+                  @blur="handleInputConfirm(scope.row)"
+                >
+                </el-input>
+                <el-button
+                  style="margin: 0 15px"
+                  v-else
+                  class="button-new-tag"
+                  size="small"
+                  @click="showInput(scope.row)"
+                  >+ New Tag</el-button
+                >
+              </template>
+            </el-table-column>
             <el-table-column type="index" label="#"> </el-table-column>
             <el-table-column prop="attr_name" label="参数名称">
             </el-table-column>
@@ -71,7 +102,38 @@
             >添加属性</el-button
           >
           <el-table :data="onlyTableData" border stripe>
-            <el-table-column type="expand"></el-table-column>
+            <el-table-column type="expand">
+              <template scope="scope">
+                <el-tag
+                  style="margin: 0 15px"
+                  v-for="(item, index) in scope.row.attr_vals"
+                  :key="index"
+                  closable
+                  @close="handleClose(index, scope.row)"
+                >
+                  {{ item }}</el-tag
+                >
+                <el-input
+                  style="width: 120px; margin: 0 15px"
+                  class="input-new-tag"
+                  v-if="scope.row.inputVisible"
+                  v-model="scope.row.inputValue"
+                  ref="saveTagInput"
+                  size="small"
+                  @keyup.enter.native="handleInputConfirm(scope.row)"
+                  @blur="handleInputConfirm(scope.row)"
+                >
+                </el-input>
+                <el-button
+                  style="margin: 0 15px"
+                  v-else
+                  class="button-new-tag"
+                  size="small"
+                  @click="showInput(scope.row)"
+                  >+ New Tag</el-button
+                >
+              </template>
+            </el-table-column>
             <el-table-column type="index" label="#"> </el-table-column>
             <el-table-column prop="attr_name" label="属性名称">
             </el-table-column>
@@ -206,6 +268,8 @@ export default {
     handleChange() {
       if (this.selectedCateKey.length !== 3) {
         this.selectedCateKey = [];
+        this.manyTableData = [];
+        this.onlyTableData = [];
         return;
       }
 
@@ -225,6 +289,11 @@ export default {
         return this.$message.error("获取参数列表失败");
 
       console.log(res.data);
+      res.data.forEach((item) => {
+        item.attr_vals = item.attr_vals ? item.attr_vals.split(",") : [];
+        item.inputVisible = false;
+        item.inputValue = "";
+      });
       if (this.activeName === "many") {
         this.manyTableData = res.data;
       } else {
@@ -322,6 +391,42 @@ export default {
       } else {
         this.$message.info("已取消删除");
       }
+    },
+    async handleInputConfirm(row) {
+      if (row.inputValue.trim().length === 0) {
+        row.inputValue = "";
+        row.inputVisible = false;
+        return;
+      }
+
+      row.attr_vals.push(row.inputValue.trim());
+      row.inputValue = "";
+      row.inputVisible = false;
+
+      this.saveAttrVals(row);
+    },
+
+    async saveAttrVals(row) {
+      const { data: res } = await this.$http.put(
+        `categories/${this.cateId}/attributes/${row.attr_id}`,
+        {
+          attr_name: row.attr_name,
+          attr_sel: row.attr_sel,
+          attr_vals: row.attr_vals.join(","),
+        }
+      );
+      if (res.meta.status != 200) return this.$message.error("更改标签失败");
+      this.$message.success("更改标签成功");
+    },
+    showInput(row) {
+      row.inputVisible = true;
+      this.$nextTick((_) => {
+        this.$refs.saveTagInput.$refs.input.focus();
+      });
+    },
+    handleClose(i, row) {
+      row.attr_vals.splice(i, 1);
+      this.saveAttrVals(row);
     },
   },
 
