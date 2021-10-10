@@ -51,7 +51,7 @@ const routes = [{
                 path: '/home/addGoods',
                 component: Add,
             }, {
-                path: '*',
+                path: '',
                 redirect: ('/home/welcome')
             }
         ]

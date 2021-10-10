@@ -28,3 +28,7 @@ body,
 .el-cascader-menu {
     height: 200px;
 }
+
+.el-step__title {
+    font-size: 13px !important;
+}
