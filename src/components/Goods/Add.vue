@@ -90,15 +90,32 @@
               :key="item.attr_id"
               :label="item.attr_name"
             >
-              <el-input v-model="item.attr_vals">
-              </el-input>
+              <el-input v-model="item.attr_vals"> </el-input>
             </el-form-item>
           </el-tab-pane>
-          <el-tab-pane label="商品图片" name="3">定时任务补偿</el-tab-pane>
+          <el-tab-pane label="商品图片" name="3">
+            <el-upload
+              action="http://127.0.0.1:8888/api/private/v1/upload"
+              :headers="headerObj"
+              :on-preview="handlePreview"
+              :on-remove="handleRemove"
+              list-type="picture"
+              :on-success="handleSuccess"
+            >
+              <el-button size="small" type="primary">点击上传</el-button>
+              <div slot="tip" class="el-upload__tip">
+                只能上传jpg/png文件，且不超过500kb
+              </div>
+            </el-upload>
+          </el-tab-pane>
           <el-tab-pane label="商品内容" name="4">定时任务补偿</el-tab-pane>
         </el-tabs>
       </el-form>
     </el-card>
+
+    <el-dialog title="图片预览" :visible.sync="previewVisible" width="50%">
+      <img :src="previewPath" style="width:100%"/>
+    </el-dialog>
   </div>
 </template>
 
@@ -106,6 +123,11 @@
 export default {
   data() {
     return {
+      previewVisible: false,
+      previewPath: "",
+      headerObj: {
+        Authorization: window.sessionStorage.getItem("token"),
+      },
       manyTableData: [],
       onlyTableData: [],
       cateProps: {
@@ -122,6 +144,7 @@ export default {
         goods_weight: 0,
         goods_number: 0,
         goods_cat: [],
+        pics: [],
       },
       addFormRules: {
         goods_name: [
@@ -195,13 +218,22 @@ export default {
         if (res.meta.status != 200)
           return this.$message.error("获取静态属性失败");
 
-        res.data.forEach((item) => {
-          item.attr_vals =
-            item.attr_vals.length === 0 ? [] : item.attr_vals.split(",");
-        });
         this.onlyTableData = res.data;
         this.$message.success("获取静态属性成功");
       }
+    },
+    handlePreview(file) {
+      this.previewPath = file.response.data.url;
+      this.previewVisible = true;
+    },
+    handleRemove(file) {
+      const filePath = file.response.data.tmp_path;
+      const i = this.addForm.pics.findIndex((x) => x.pic === filePath);
+      this.addForm.pics.splice(i, 1);
+    },
+    handleSuccess(response) {
+      const picInfo = { pic: response.data.tmp_path };
+      this.addForm.pics.push(picInfo);
     },
   },
 
