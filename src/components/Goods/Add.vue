@@ -74,10 +74,26 @@
               :key="item.attr_id"
               :label="item.attr_name"
             >
-
+              <el-checkbox-group v-model="item.attr_vals">
+                <el-checkbox
+                  v-for="(data, index) in item.attr_vals"
+                  :key="index"
+                  :label="data"
+                  border
+                ></el-checkbox>
+              </el-checkbox-group>
             </el-form-item>
           </el-tab-pane>
-          <el-tab-pane label="商品属性" name="2">角色管理</el-tab-pane>
+          <el-tab-pane label="商品属性" name="2">
+            <el-form-item
+              v-for="item in onlyTableData"
+              :key="item.attr_id"
+              :label="item.attr_name"
+            >
+              <el-input v-model="item.attr_vals">
+              </el-input>
+            </el-form-item>
+          </el-tab-pane>
           <el-tab-pane label="商品图片" name="3">定时任务补偿</el-tab-pane>
           <el-tab-pane label="商品内容" name="4">定时任务补偿</el-tab-pane>
         </el-tabs>
@@ -91,6 +107,7 @@ export default {
   data() {
     return {
       manyTableData: [],
+      onlyTableData: [],
       cateProps: {
         expandTrigger: "hover",
         label: "cat_name",
@@ -171,12 +188,18 @@ export default {
           `categories/${this.cateId}/attributes`,
           {
             params: {
-              sel: "one",
+              sel: "only",
             },
           }
         );
         if (res.meta.status != 200)
           return this.$message.error("获取静态属性失败");
+
+        res.data.forEach((item) => {
+          item.attr_vals =
+            item.attr_vals.length === 0 ? [] : item.attr_vals.split(",");
+        });
+        this.onlyTableData = res.data;
         this.$message.success("获取静态属性成功");
       }
     },
@@ -197,3 +220,10 @@ export default {
   },
 };
 </script>
+
+
+<style scoped>
+.el-checkbox {
+  margin: 0 5px 0 0 !important;
+}
+</style>
