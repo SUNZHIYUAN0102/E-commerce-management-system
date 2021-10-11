@@ -274,7 +274,7 @@ export default {
           const{data:res} = await this.$http.post('goods',form);
           if(res.meta.status!=201) return this.$message.error('创建商品失败');
           this.$message.success('创建商品成功');
-          this.$router.push('/home/goods');
+          this.$router.push('/goods');
         } else {
           return this.$message.error("请填写必要的表单项");
         }
