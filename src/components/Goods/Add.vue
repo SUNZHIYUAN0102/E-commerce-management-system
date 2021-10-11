@@ -108,18 +108,27 @@
               </div>
             </el-upload>
           </el-tab-pane>
-          <el-tab-pane label="商品内容" name="4">定时任务补偿</el-tab-pane>
+          <el-tab-pane label="商品内容" name="4">
+            <quill-editor
+              ref="myQuillEditor"
+              v-model="addForm.goods_introduce"
+            ></quill-editor>
+            <el-button type="primary" style="margin-top: 15px" @click="add"
+              >添加商品</el-button
+            >
+          </el-tab-pane>
         </el-tabs>
       </el-form>
     </el-card>
 
     <el-dialog title="图片预览" :visible.sync="previewVisible" width="50%">
-      <img :src="previewPath" style="width:100%"/>
+      <img :src="previewPath" style="width: 100%" />
     </el-dialog>
   </div>
 </template>
 
 <script>
+import _ from "lodash";
 export default {
   data() {
     return {
@@ -145,6 +154,8 @@ export default {
         goods_number: 0,
         goods_cat: [],
         pics: [],
+        goods_introduce: "",
+        attrs: [],
       },
       addFormRules: {
         goods_name: [
@@ -234,6 +245,40 @@ export default {
     handleSuccess(response) {
       const picInfo = { pic: response.data.tmp_path };
       this.addForm.pics.push(picInfo);
+    },
+
+    add() {
+      this.$refs.addFormRef.validate(async (valid) => {
+        if (valid) {
+          const form = _.cloneDeep(this.addForm);
+          form.goods_cat = form.goods_cat.join(",");
+          this.manyTableData.forEach((item) => {
+            const newInfo = {
+              attr_id: item.attr_id,
+              attr_value: item.attr_vals.join(","),
+            };
+            this.addForm.attrs.push(newInfo);
+            console.log(newInfo);
+          });
+
+          this.onlyTableData.forEach((item) => {
+            const newInfo = {
+              attr_id: item.attr_id,
+              attr_value: item.attr_vals,
+            };
+            this.addForm.attrs.push(newInfo);
+          });
+
+          form.attrs = this.addForm.attrs;
+          console.log(form);
+          const{data:res} = await this.$http.post('goods',form);
+          if(res.meta.status!=201) return this.$message.error('创建商品失败');
+          this.$message.success('创建商品成功');
+          this.$router.push('/home/goods');
+        } else {
+          return this.$message.error("请填写必要的表单项");
+        }
+      });
     },
   },
 
