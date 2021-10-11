@@ -245,6 +245,7 @@ export default {
             form
           );
 
+          console.log(res.meta.status);
           if (res.meta.status != 201)
             return this.$message.error("更改商品失败");
           this.$message.success("更改商品成功");
