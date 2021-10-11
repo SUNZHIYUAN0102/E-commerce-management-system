@@ -34,10 +34,10 @@
             </template>
 
             <el-menu-item
-              :index="child.path"
+              :index="'/'+child.path"
               v-for="child in item.children"
               :key="child.id"
-              @click="saveNavState(child.path)"
+              @click="saveNavState('/'+child.path)"
             >
               <template slot="title">
                 <i class="el-icon-menu"></i>

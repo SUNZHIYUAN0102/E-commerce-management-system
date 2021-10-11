@@ -10,6 +10,7 @@ import Categories from '../components/Goods/Categories.vue'
 import Params from '../components/Goods/Params.vue'
 import List from '../components/Goods/List.vue'
 import Add from '../components/Goods/Add.vue'
+import Edit from '../components/Goods/EditCategories.vue'
 Vue.use(VueRouter)
 
 const routes = [{
@@ -20,39 +21,42 @@ const routes = [{
         path: '/home',
         component: Home,
         children: [{
-                path: '/home/welcome',
+                path: '/welcome',
                 component: Welcome
             },
             {
-                path: '/home/users',
+                path: '/users',
                 component: Users
             },
             {
-                path: '/home/rights',
+                path: '/rights',
                 component: Rights
             },
             {
-                path: '/home/roles',
+                path: '/roles',
                 component: Roles
             },
             {
-                path: '/home/categories',
+                path: '/categories',
                 component: Categories
             },
             {
-                path: '/home/params',
+                path: '/params',
                 component: Params
             },
             {
-                path: '/home/goods',
+                path: '/goods',
                 component: List,
             },
             {
-                path: '/home/addGoods',
+                path: '/goods/addGoods',
                 component: Add,
             }, {
+                path: '/goods/editGoods/:id',
+                component: Edit,
+            }, {
                 path: '',
-                redirect: ('/home/welcome')
+                redirect: ('/welcome')
             }
         ]
     }, {

@@ -43,6 +43,7 @@
               type="primary"
               icon="el-icon-edit"
               size="mini"
+              @click="editGoods(scope.row.goods_id)"
             ></el-button>
             <el-button
               type="danger"
@@ -130,7 +131,11 @@ export default {
     },
 
     goAddGoodsPage(){
-      this.$router.push('/home/addGoods');
+      this.$router.push('/goods/addGoods');
+    },
+
+    editGoods(id){
+      this.$router.push(`/goods/editGoods/${id}`);
     }
 
   },

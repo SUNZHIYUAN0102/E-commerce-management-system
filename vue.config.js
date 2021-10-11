@@ -1,3 +1,3 @@
-module.exports = {
-  lintOnSave: false
+mnpodule.exports = {
+    lintOnSave: false,
 }
