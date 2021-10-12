@@ -12,6 +12,7 @@ import List from '../components/Goods/List.vue'
 import Add from '../components/Goods/Add.vue'
 import Edit from '../components/Goods/EditCategories.vue'
 import OrderList from '../components/Order/List.vue'
+import Report from '../components/Report/Report.vue'
 Vue.use(VueRouter)
 
 const routes = [{
@@ -59,6 +60,9 @@ const routes = [{
             {
                 path: '/orders',
                 component: OrderList
+            }, {
+                path: '/reports',
+                component: Report
             }, {
                 path: '',
                 redirect: ('/welcome')
