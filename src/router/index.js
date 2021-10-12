@@ -11,6 +11,7 @@ import Params from '../components/Goods/Params.vue'
 import List from '../components/Goods/List.vue'
 import Add from '../components/Goods/Add.vue'
 import Edit from '../components/Goods/EditCategories.vue'
+import OrderList from '../components/Order/List.vue'
 Vue.use(VueRouter)
 
 const routes = [{
@@ -54,6 +55,10 @@ const routes = [{
             }, {
                 path: '/goods/editGoods/:id',
                 component: Edit,
+            },
+            {
+                path: '/orders',
+                component: OrderList
             }, {
                 path: '',
                 redirect: ('/welcome')
